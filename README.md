@@ -8,14 +8,13 @@ A simple tool for transferring files between mobile and desktop on the same loca
 - Files expire after 5 minutes with countdown timer
 - Two-way file transfers (mobile ↔ desktop)
 
-![Desktop view](screenshots/desktop_view.jpg)
+<div align="center">
+  <img src="screenshots/desktop_view.jpg" width="450" alt="Desktop view">
+  <p><em>Desktop view with QR code for mobile connection</em></p>
 
-_Desktop view with QR code for mobile connection_
-
-![Screenshot](screenshots/mobile_view.jpg)
-
-_Mobile view of Snap Send_
-
+  <img src="screenshots/mobile_view.jpg" width="300" alt="Mobile view">
+  <p><em>Mobile view of Snap Send</em></p>
+</div>
 
 ## Setup
 
