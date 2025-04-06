@@ -118,6 +118,13 @@ p {
     color: #86868b;
 }
 
+#files li .file-expires, #shared-files li .file-expires {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #ff3b30;
+    margin-top: 2px;
+}
+
 #files li a, #shared-files li a {
     color: #0071e3;
     text-decoration: none;
@@ -198,9 +205,9 @@ p {
     background: #30b954;
 }
 
-/* 刷新按钮单独样式定义，防止与其他按钮混淆 */
+/* Refresh button styles */
 #refresh-button {
-    background: #0052a3;  /* 蓝色 */
+    background: #0052a3;  /* Blue */
     width: 100%;
     margin-bottom: 10px;
 }
@@ -236,6 +243,16 @@ p {
     width: 0%;
     transition: width 0.3s;
     display: block;
+}
+
+.countdown-critical {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 @media (max-width: 600px) {

@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addFileToList(file) {
         // Create list item
         const li = document.createElement('li');
+        li.dataset.fileId = file.name; // 用于更新倒计时
         
         // Create file info container
         const fileInfoContainer = document.createElement('div');
@@ -262,9 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
         fileDate.className = 'file-date';
         fileDate.textContent = file.created || 'Unknown date';
         
+        // Create file expiry element
+        const fileExpires = document.createElement('span');
+        fileExpires.className = 'file-expires';
+        fileExpires.dataset.expiresAt = file.timestamp + 300; // 5分钟后过期
+        fileExpires.dataset.expiresIn = file.expiresIn;
+        updateCountdown(fileExpires);
+        
         // Add file info elements to container
         fileInfoContainer.appendChild(fileName);
         fileInfoContainer.appendChild(fileDate);
+        fileInfoContainer.appendChild(fileExpires);
         
         // Create download link
         const downloadLink = document.createElement('a');
@@ -279,6 +288,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add to the list
         filesList.appendChild(li);
     }
+    
+    // 更新所有倒计时
+    function updateAllCountdowns() {
+        const countdowns = document.querySelectorAll('.file-expires');
+        countdowns.forEach(updateCountdown);
+    }
+    
+    // 更新单个倒计时
+    function updateCountdown(element) {
+        if (!element) return;
+        
+        const expiresIn = parseInt(element.dataset.expiresIn) || 0;
+        
+        if (expiresIn <= 0) {
+            element.textContent = `Expired`;
+            return;
+        }
+        
+        const minutes = Math.floor(expiresIn / 60);
+        const seconds = expiresIn % 60;
+        
+        element.textContent = `Expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // If less than 30 seconds, add flashing effect
+        if (expiresIn < 30) {
+            element.classList.add('countdown-critical');
+        } else {
+            element.classList.remove('countdown-critical');
+        }
+        
+        // Update remaining time
+        element.dataset.expiresIn = expiresIn - 1;
+    }
+    
+    // 每秒更新一次倒计时
+    setInterval(updateAllCountdowns, 1000);
     
     // Helper function to convert ArrayBuffer to Base64
     function arrayBufferToBase64(buffer) {

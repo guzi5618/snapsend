@@ -12,34 +12,37 @@ import time
 import datetime
 from urllib.parse import urlparse, parse_qs, unquote
 
+# File expiration time (seconds)
+FILE_EXPIRY_TIME = 300  # 5 minutes
+
 # Get local IP address
 
 
 def get_local_ip():
-    # 尝试多种方法获取IP
+    # Try multiple methods to get IP
     try:
-        # 首选方法：创建UDP连接并获取本地IP
+        # Preferred method: Create UDP connection and get local IP
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()
 
-        # 确认是否为局域网IP
+        # Confirm if it's a local network IP
         if ip.startswith(('192.168.', '10.', '172.16.', '172.17.', '172.18.')):
             return ip
     except Exception as e:
-        print(f"首选IP检测方法失败: {e}")
+        print(f"Primary IP detection method failed: {e}")
 
-    # 备选方法：尝试获取所有网络接口
+    # Alternative method: Try to get all network interfaces
     try:
         interfaces = socket.gethostbyname_ex(socket.gethostname())[-1]
         for ip in interfaces:
             if ip.startswith(('192.168.', '10.', '172.16.', '172.17.', '172.18.')):
                 return ip
     except Exception as e:
-        print(f"备选IP检测方法失败: {e}")
+        print(f"Alternative IP detection method failed: {e}")
 
-    # 所有方法都失败，返回本地回环
+    # All methods failed, return local loopback
     return "127.0.0.1"
 
 # Custom HTTP request handler
@@ -63,7 +66,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Get list of files in received_files directory
             files = []
             current_time = time.time()
-            one_day_ago = current_time - (24 * 60 * 60)  # 24 hours in seconds
 
             if os.path.exists('received_files'):
                 for filename in os.listdir('received_files'):
@@ -73,8 +75,11 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                         file_size = file_stats.st_size
                         created_time = file_stats.st_mtime
 
-                        # Only include files created in the last 24 hours
-                        if created_time >= one_day_ago:
+                        # Calculate remaining time (seconds)
+                        time_left = max(0, int(created_time + FILE_EXPIRY_TIME - current_time))
+
+                        # Only include unexpired files
+                        if time_left > 0:
                             # Format the timestamp as a readable date
                             created_date = datetime.datetime.fromtimestamp(
                                 created_time).strftime('%Y-%m-%d %H:%M:%S')
@@ -84,8 +89,16 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                                 'size': file_size,
                                 'path': f'/received_files/{filename}',
                                 'created': created_date,
-                                'timestamp': created_time
+                                'timestamp': created_time,
+                                'expiresIn': time_left  # Remaining seconds
                             })
+                        else:
+                            # File has expired, delete it
+                            try:
+                                os.remove(file_path)
+                                print(f"Deleted expired file: {file_path}")
+                            except Exception as e:
+                                print(f"Error deleting file: {e}")
 
             # Sort by timestamp, newest first
             files.sort(key=lambda x: x['timestamp'], reverse=True)
@@ -103,7 +116,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Get list of files in shared_files directory
             files = []
             current_time = time.time()
-            one_day_ago = current_time - (24 * 60 * 60)  # 24 hours in seconds
 
             if os.path.exists('shared_files'):
                 for filename in os.listdir('shared_files'):
@@ -113,8 +125,11 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                         file_size = file_stats.st_size
                         created_time = file_stats.st_mtime
 
-                        # Only include files created in the last 24 hours
-                        if created_time >= one_day_ago:
+                        # Calculate remaining time (seconds)
+                        time_left = max(0, int(created_time + FILE_EXPIRY_TIME - current_time))
+
+                        # Only include unexpired files
+                        if time_left > 0:
                             # Format the timestamp as a readable date
                             created_date = datetime.datetime.fromtimestamp(
                                 created_time).strftime('%Y-%m-%d %H:%M:%S')
@@ -124,8 +139,16 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                                 'size': file_size,
                                 'path': f'/shared_files/{filename}',
                                 'created': created_date,
-                                'timestamp': created_time
+                                'timestamp': created_time,
+                                'expiresIn': time_left  # Remaining seconds
                             })
+                        else:
+                            # File has expired, delete it
+                            try:
+                                os.remove(file_path)
+                                print(f"Deleted expired file: {file_path}")
+                            except Exception as e:
+                                print(f"Error deleting file: {e}")
 
             # Sort by timestamp, newest first
             files.sort(key=lambda x: x['timestamp'], reverse=True)
@@ -137,7 +160,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Serve received files
         elif path.startswith('/received_files/'):
             encoded_filename = path.split('/')[-1]
-            filename = unquote(encoded_filename)  # 解码URL编码的文件名
+            filename = unquote(encoded_filename)  # Decode URL-encoded filename
             file_path = os.path.join('received_files', filename)
 
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -149,7 +172,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', content_type)
                 self.send_header('Content-Length', str(os.path.getsize(file_path)))
-                # 使用引号包裹文件名，并处理特殊字符
+                # Use quotes for filename and handle special characters
                 safe_filename = filename.replace('"', '\\"')
                 self.send_header('Content-Disposition', f'attachment; filename="{safe_filename}"')
                 self.end_headers()
@@ -165,7 +188,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Serve shared files
         elif path.startswith('/shared_files/'):
             encoded_filename = path.split('/')[-1]
-            filename = unquote(encoded_filename)  # 解码URL编码的文件名
+            filename = unquote(encoded_filename)  # Decode URL-encoded filename
             file_path = os.path.join('shared_files', filename)
 
             print(f"Trying to access shared file: '{filename}' (from '{encoded_filename}')")
@@ -182,7 +205,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', content_type)
                 self.send_header('Content-Length', str(os.path.getsize(file_path)))
-                # 使用引号包裹文件名，并处理特殊字符
+                # Use quotes for filename and handle special characters
                 safe_filename = filename.replace('"', '\\"')
                 self.send_header('Content-Disposition', f'attachment; filename="{safe_filename}"')
                 self.end_headers()
@@ -342,29 +365,29 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def find_available_port(start_port=8000, max_attempts=10):
-    """尝试找到一个可用的端口"""
+    """Try to find an available port"""
     port = start_port
     attempts = 0
 
     while attempts < max_attempts:
         try:
-            # 创建一个临时socket来测试端口是否可用
+            # Create a temporary socket to test if port is available
             test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             test_socket.settimeout(1)
             test_socket.bind(('', port))
             test_socket.close()
-            return port  # 端口可用
+            return port  # Port is available
         except OSError:
-            # 端口不可用，尝试下一个
+            # Port not available, try another one
             attempts += 1
             if port == start_port:
-                # 如果默认端口不可用，尝试一个随机端口
+                # If default port isn't available, try a random port
                 port = random.randint(8001, 9000)
             else:
-                # 否则，继续递增
+                # Otherwise, continue incrementing
                 port += 1
 
-    # 如果所有尝试都失败，使用一个随机高端口
+    # If all attempts fail, use a random high port
     return random.randint(49152, 65535)
 
 # Main function
@@ -379,9 +402,9 @@ def main():
     # Get local IP address
     ip = get_local_ip()
 
-    # 找到可用端口
+    # Find available port
     port = find_available_port()
-    print(f"尝试使用端口: {port}")
+    print(f"Trying to use port: {port}")
 
     # Create handler with current directory
     handler = CustomHTTPRequestHandler
@@ -411,8 +434,8 @@ def main():
             httpd.server_close()
     except Exception as e:
         print(f"Error starting server: {e}")
-        print("尝试使用一个随机端口...")
-        # 如果仍然失败，尝试一个完全随机的端口
+        print("Trying to use a random port...")
+        # If still fails, try a completely random port
         port = random.randint(10000, 65000)
         try:
             httpd = socketserver.TCPServer(("", port), handler)
@@ -425,8 +448,8 @@ def main():
 
             httpd.serve_forever()
         except Exception as e2:
-            print(f"无法启动服务器: {e2}")
-            print("请确保没有其他程序占用过多端口，或者尝试手动终止其他Python进程")
+            print(f"Unable to start server: {e2}")
+            print("Please make sure no other programs are using too many ports, or try to manually terminate other Python processes")
 
 
 if __name__ == "__main__":

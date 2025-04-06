@@ -4,13 +4,17 @@ A simple tool for transferring files between mobile and desktop on the same loca
 
 ## Features
 
-- QR code scanning for easy connection between devices
 - Local network file transfer without internet connection
+- Files expire after 5 minutes with countdown timer
+- Two-way file transfers (mobile ↔ desktop)
 
-
-![Screenshot](screenshots/desktop_view.jpg)
+![Desktop view](screenshots/desktop_view.jpg)
 
 _Desktop view with QR code for mobile connection_
+
+![Screenshot](screenshots/mobile_view.jpg)
+
+_Mobile view of Snap Send_
 
 
 ## Setup
@@ -44,6 +48,7 @@ This is a simple implementation for local network file transfers. For security r
 - Transfers work only on the same local network
 - There's no authentication mechanism
 - Large files (>10MB) may cause browser performance issues
+- All files are automatically deleted after 5 minutes
 
 ## License
 
