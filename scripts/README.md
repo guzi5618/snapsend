@@ -1,22 +1,8 @@
 # Snap Send Scripts
 
-This directory contains scripts to help with Snap Send installation and usage.
+This directory contains a script to help with Snap Send installation.
 
-## Available Scripts
-
-### snap_send
-
-A launcher script that can be used to start Snap Send from any directory.
-
-**Usage:**
-```bash
-./snap_send
-```
-
-Once installed to your system path, you can simply run:
-```bash
-snap_send
-```
+## Available Script
 
 ### install_snap_send.sh
 
