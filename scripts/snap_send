@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Snap Send Launcher
+# This script launches the Snap Send file transfer service from anywhere
+
+# Configuration
+SNAP_SEND_DIR="$HOME/snap_send"
+
+# Check if installation exists
+if [ ! -d "$SNAP_SEND_DIR" ]; then
+    echo "Snap Send is not installed at $SNAP_SEND_DIR"
+    
+    # Ask for installation
+    read -p "Would you like to install Snap Send now? (y/n) " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Installing Snap Send..."
+        
+        # Create directory
+        mkdir -p "$SNAP_SEND_DIR"
+        
+        # Try to clone from GitHub
+        if command -v git &> /dev/null; then
+            echo "Using git to install Snap Send..."
+            git clone https://github.com/yourusername/snap_send.git "$SNAP_SEND_DIR" 2>/dev/null
+            
+            if [ $? -ne 0 ]; then
+                echo "Failed to clone from GitHub."
+                exit 1
+            fi
+        else
+            echo "Git is not installed. Please install Snap Send manually."
+            exit 1
+        fi
+        
+        echo "Snap Send has been installed to $SNAP_SEND_DIR"
+    else
+        echo "Installation cancelled."
+        exit 1
+    fi
+fi
+
+# Go to the Snap Send directory
+cd "$SNAP_SEND_DIR"
+
+# Check if the server script exists
+if [ ! -f "snap_send_server.py" ]; then
+    echo "Error: snap_send_server.py not found in $SNAP_SEND_DIR"
+    exit 1
+fi
+
+# Check if Python is installed
+if ! command -v python3 &> /dev/null; then
+    echo "Error: Python 3 is not installed. Please install Python 3 and try again."
+    exit 1
+fi
+
+# Start the server
+echo "Starting Snap Send server..."
+python3 snap_send_server.py "$@" 

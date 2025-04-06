@@ -31,6 +31,18 @@ python3 snap_send_server.py
 6. Scan the QR code with your mobile device
 7. Upload files from your mobile device to your computer 
 
+## System-wide Installation
+
+For convenience, you can install Snap Send system-wide to run it from anywhere:
+
+```bash
+chmod +x scripts/install_snap_send.sh
+./scripts/install_snap_send.sh
+```
+
+After installation, simply type `snap_send` in any terminal to launch the service.
+
+**Note:** These paths are for Mac computers. For Linux or other systems, the paths may differ.
 
 ## Troubleshooting
 
