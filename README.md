@@ -7,6 +7,7 @@ A simple tool for transferring files between mobile and desktop on the same loca
 - Local network file transfer without internet connection
 - Files expire after 5 minutes with countdown timer
 - Two-way file transfers (mobile ↔ desktop)
+- Simple text chat between devices.
 
 <div align="center">
   <img src="screenshots/desktop_view.jpg" width="450" alt="Desktop view">

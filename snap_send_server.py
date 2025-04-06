@@ -15,6 +15,85 @@ from urllib.parse import urlparse, parse_qs, unquote
 # File expiration time (seconds)
 FILE_EXPIRY_TIME = 300  # 5 minutes
 
+# Messages file path
+MESSAGES_FILE = "messages.json"
+
+# Initialize messages file if it doesn't exist
+
+
+def init_messages_file():
+    if not os.path.exists(MESSAGES_FILE):
+        with open(MESSAGES_FILE, 'w') as f:
+            json.dump({"messages": []}, f)
+    else:
+        # Verify the file has the correct structure
+        try:
+            with open(MESSAGES_FILE, 'r') as f:
+                data = json.load(f)
+                if "messages" not in data:
+                    # Reset file if structure is invalid
+                    with open(MESSAGES_FILE, 'w') as f:
+                        json.dump({"messages": []}, f)
+        except Exception as e:
+            print(f"Error reading messages file, resetting: {e}")
+            with open(MESSAGES_FILE, 'w') as f:
+                json.dump({"messages": []}, f)
+
+# Add a new message
+
+
+def add_message(sender, content):
+    try:
+        # Read existing messages
+        with open(MESSAGES_FILE, 'r') as f:
+            data = json.load(f)
+
+        # Add new message with timestamp
+        message = {
+            "sender": sender,
+            "content": content,
+            "timestamp": time.time(),
+            "time": datetime.datetime.now().strftime("%H:%M:%S")
+        }
+        data["messages"].append(message)
+
+        # Keep only the last 100 messages
+        if len(data["messages"]) > 100:
+            data["messages"] = data["messages"][-100:]
+
+        # Write updated messages
+        with open(MESSAGES_FILE, 'w') as f:
+            json.dump(data, f)
+
+        return True
+    except Exception as e:
+        print(f"Error adding message: {e}")
+        return False
+
+# Get all messages
+
+
+def get_messages():
+    try:
+        with open(MESSAGES_FILE, 'r') as f:
+            data = json.load(f)
+        return data["messages"]
+    except Exception as e:
+        print(f"Error getting messages: {e}")
+        return []
+
+# Clear all messages
+
+
+def clear_messages():
+    try:
+        with open(MESSAGES_FILE, 'w') as f:
+            json.dump({"messages": []}, f)
+        return True
+    except Exception as e:
+        print(f"Error clearing messages: {e}")
+        return False
+
 # Get local IP address
 
 
@@ -56,6 +135,38 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         # Print the requested path
         print(f"GET request for: {path}")
+
+        # API endpoint to get messages
+        if path == '/api/messages':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+
+            # Get all messages
+            messages = get_messages()
+
+            # Send messages as JSON
+            self.wfile.write(json.dumps(messages).encode('utf-8'))
+            return
+
+        # API endpoint to clear all messages
+        elif path == '/api/clear-messages':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+
+            # Clear all messages
+            if clear_messages():
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'message': 'All messages cleared'
+                }).encode('utf-8'))
+            else:
+                self.wfile.write(json.dumps({
+                    'status': 'error',
+                    'message': 'Failed to clear messages'
+                }).encode('utf-8'))
+            return
 
         # API endpoint to get received files list (from mobile to desktop)
         if path == '/api/files':
@@ -226,11 +337,60 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
-        """Handle POST requests for file uploads"""
+        """Handle POST requests for file uploads and messages"""
         print(f"POST request for: {self.path}")
 
+        # Handle sending a message
+        if self.path == '/api/send-message':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+
+            try:
+                # Parse JSON data
+                json_data = json.loads(post_data.decode('utf-8'))
+
+                # Check if it's a valid message
+                if 'sender' in json_data and 'content' in json_data:
+                    sender = json_data['sender']
+                    content = json_data['content']
+
+                    # Validate message content
+                    if content.strip() == "":
+                        self.send_response(400)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            'status': 'error',
+                            'message': 'Message content cannot be empty'
+                        }).encode('utf-8'))
+                        return
+
+                    # Add message
+                    if add_message(sender, content):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            'status': 'success',
+                            'message': 'Message sent successfully'
+                        }).encode('utf-8'))
+                        return
+                    else:
+                        self.send_response(500)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            'status': 'error',
+                            'message': 'Failed to send message'
+                        }).encode('utf-8'))
+                        return
+            except Exception as e:
+                print(f"Error processing message: {e}")
+                # If JSON parsing fails or any other error
+                pass
+
         # Handle upload from mobile to desktop
-        if self.path == '/upload':
+        elif self.path == '/upload':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
 
@@ -394,6 +554,9 @@ def find_available_port(start_port=8000, max_attempts=10):
 
 
 def main():
+    # Initialize messages file
+    init_messages_file()
+
     # Create required directories if they don't exist
     for directory in ['received_files', 'shared_files']:
         if not os.path.exists(directory):

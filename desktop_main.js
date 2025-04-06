@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBarDesktop = document.getElementById('progress-desktop');
     const uploadStatusDesktop = document.getElementById('upload-status-desktop');
     
+    // Chat elements
+    const messagesContainer = document.getElementById('messages-container');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const clearChatButton = document.getElementById('clear-chat-button');
+    
     // Set to track known files to avoid duplicate notifications
     const knownFiles = new Set();
     
@@ -18,6 +25,91 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Generate QR code with the current URL
     generateQRCode();
+    
+    // Get device name (used as sender name)
+    const deviceName = "Desktop";
+    
+    // Last message timestamp
+    let lastMessageTimestamp = 0;
+    
+    // Load messages
+    loadMessages();
+    
+    // Set up polling for new messages (every 2 seconds)
+    setInterval(loadMessages, 2000);
+    
+    // Handle message form submission
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const content = messageInput.value.trim();
+        
+        if (content === '') {
+            return;
+        }
+        
+        sendMessage(deviceName, content);
+        messageInput.value = '';
+    });
+    
+    // Clear chat button functionality
+    if (clearChatButton) {
+        clearChatButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all messages?')) {
+                clearAllMessages();
+            }
+        });
+    }
+    
+    // Function to clear all messages
+    function clearAllMessages() {
+        fetch('/api/clear-messages')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to clear messages');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Messages cleared:', data);
+                messagesContainer.innerHTML = '';
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-chat';
+                emptyMessage.textContent = 'No text messages yet. Start by sending a message!';
+                messagesContainer.appendChild(emptyMessage);
+            })
+            .catch(error => {
+                console.error('Error clearing messages:', error);
+                alert('Failed to clear messages. Please try again.');
+            });
+    }
+    
+    // Send a message
+    function sendMessage(sender, content) {
+        fetch('/api/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: sender,
+                content: content
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to send message');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Message sent:', data);
+            loadMessages(); // Refresh messages immediately
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
+    }
     
     // Handle desktop file uploads
     if (uploadFormDesktop) {
@@ -343,5 +435,110 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
         else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
         else return (bytes / 1073741824).toFixed(1) + ' GB';
+    }
+    
+    // Load messages
+    function loadMessages() {
+        fetch('/api/messages')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load messages');
+            }
+            return response.json();
+        })
+        .then(messages => {
+            updateMessages(messages);
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+        });
+    }
+    
+    // Update messages in the UI
+    function updateMessages(messages) {
+        if (!messagesContainer) return;
+        
+        // Find the latest message timestamp
+        let latestTimestamp = lastMessageTimestamp;
+        let hasNewMessages = false;
+        
+        messages.forEach(message => {
+            if (message.timestamp > lastMessageTimestamp) {
+                hasNewMessages = true;
+            }
+            if (message.timestamp > latestTimestamp) {
+                latestTimestamp = message.timestamp;
+            }
+        });
+        
+        lastMessageTimestamp = latestTimestamp;
+        
+        // If no new messages and container already has messages, do nothing
+        if (!hasNewMessages && messagesContainer.querySelector('.message')) {
+            return;
+        }
+        
+        // Clear container
+        messagesContainer.innerHTML = '';
+        
+        // Check if there are messages
+        if (messages.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'empty-chat';
+            emptyMessage.textContent = 'No text messages yet. Start by sending a message!';
+            messagesContainer.appendChild(emptyMessage);
+            return;
+        }
+        
+        // Add messages to the container
+        messages.forEach(message => {
+            const messageElement = createMessageElement(message);
+            messagesContainer.appendChild(messageElement);
+        });
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Create a message element
+    function createMessageElement(message) {
+        const isCurrentUser = message.sender === deviceName;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isCurrentUser ? 'message-sent' : 'message-received'}`;
+        
+        const messageInfo = document.createElement('div');
+        messageInfo.className = 'message-info';
+        
+        const senderSpan = document.createElement('span');
+        senderSpan.className = 'message-sender';
+        senderSpan.textContent = message.sender;
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = message.time || formatTime(message.timestamp);
+        
+        messageInfo.appendChild(senderSpan);
+        messageInfo.appendChild(timeSpan);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = message.content;
+        
+        messageDiv.appendChild(messageInfo);
+        messageDiv.appendChild(contentDiv);
+        
+        return messageDiv;
+    }
+    
+    // Format timestamp to a readable time
+    function formatTime(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // 将输入框的placeholder修改为更符合Text Send功能的描述
+    if (messageInput) {
+        messageInput.placeholder = "Type text to send...";
     }
 }); 

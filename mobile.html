@@ -33,6 +33,17 @@
             </div>
             <ul id="shared-files"></ul>
         </div>
+        
+        <div id="chat-container">
+            <h2>Text Send <button id="clear-chat-button" title="Clear all messages">Clear</button></h2>
+            <div id="messages-container">
+                <!-- Messages will be loaded here -->
+            </div>
+            <form id="message-form">
+                <input type="text" id="message-input" placeholder="Type text to send..." maxlength="500">
+                <button type="submit" id="send-button">Send</button>
+            </form>
+        </div>
     </div>
     
     <script src="mobile_main.js"></script>
