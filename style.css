@@ -1,0 +1,249 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #f5f5f7;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #1d1d1f;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.3rem;
+    margin: 20px 0 15px;
+    color: #1d1d1f;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+p {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #86868b;
+}
+
+#qrcode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+}
+
+#qrcode {
+    margin: 0 auto;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for QR Code image */
+#qrcode img {
+    display: block;
+    margin: 0 auto;
+}
+
+#status-container {
+    margin: 30px 0;
+    padding: 15px;
+    background: #f2f2f7;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#file-list, #shared-files-container {
+    margin-top: 30px;
+}
+
+#file-list h2, #shared-files-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+#files, #shared-files {
+    list-style: none;
+}
+
+#files li, #shared-files li {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #f2f2f7;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#files li .file-info, #shared-files li .file-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0; /* For text truncation */
+}
+
+#files li .file-name, #shared-files li .file-name {
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#files li .file-date, #shared-files li .file-date {
+    font-size: 0.75rem;
+    color: #86868b;
+}
+
+#files li a, #shared-files li a {
+    color: #0071e3;
+    text-decoration: none;
+    white-space: nowrap;
+    align-self: center;
+    padding: 4px 8px;
+    background: white;
+    border-radius: 4px;
+}
+
+#files li a:hover, #shared-files li a:hover {
+    text-decoration: underline;
+}
+
+.empty-message {
+    text-align: center;
+    color: #86868b;
+    padding: 15px;
+    background: #f2f2f7;
+    border-radius: 6px;
+}
+
+.error {
+    text-align: center;
+    color: #ff3b30;
+    padding: 15px;
+    background: #fff2f0;
+    border-radius: 6px;
+}
+
+/* Mobile styles */
+.mobile .container {
+    padding: 20px;
+}
+
+#upload-container, #progress-container, 
+#progress-container-desktop {
+    margin: 30px 0;
+}
+
+#upload-form, #upload-form-desktop {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#file-input, #file-input-desktop {
+    display: none;
+}
+
+.file-input-label {
+    padding: 12px 20px;
+    background: #0071e3;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.file-input-label:hover {
+    background: #0052a3;
+}
+
+#upload-button, #upload-button-desktop, #refresh-button {
+    padding: 12px 20px;
+    background: #34c759;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+#upload-button:hover, #upload-button-desktop:hover {
+    background: #30b954;
+}
+
+/* 刷新按钮单独样式定义，防止与其他按钮混淆 */
+#refresh-button {
+    background: #0052a3;  /* 蓝色 */
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#refresh-button:hover {
+    background: #0052a3;
+}
+
+#refresh-button:active, #refresh-button:focus {
+    background: #0052a3;  /* 与hover相同，保持一致 */
+    outline: none;
+}
+
+#refresh-container {
+    margin-bottom: 15px;
+}
+
+#progress-container, #progress-container-desktop {
+    margin-top: 30px;
+}
+
+#progress-bar, #progress-bar-desktop {
+    height: 8px;
+    background: #e6e6e6;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+#progress, #progress-desktop {
+    height: 100%;
+    background: #34c759;
+    width: 0%;
+    transition: width 0.3s;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 1.6rem;
+    }
+} 

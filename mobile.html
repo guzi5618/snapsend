@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap Send - Upload Files</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="mobile">
+    <div class="container">
+        <h1>Snap Send</h1>
+        <p>Select files to send to your computer</p>
+        
+        <div id="upload-container">
+            <form id="upload-form">
+                <input type="file" id="file-input" multiple>
+                <label for="file-input" class="file-input-label">Choose Files</label>
+                <button type="submit" id="upload-button">Send Files</button>
+            </form>
+        </div>
+        
+        <div id="progress-container">
+            <div id="progress-bar">
+                <div id="progress"></div>
+            </div>
+            <p id="upload-status"></p>
+        </div>
+        
+        <div id="shared-files-container">
+            <h2>Files Shared from Desktop</h2>
+            <div id="refresh-container">
+                <button id="refresh-button">Refresh File List</button>
+            </div>
+            <ul id="shared-files"></ul>
+        </div>
+    </div>
+    
+    <script src="mobile_main.js"></script>
+</body>
+</html> 

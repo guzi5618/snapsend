@@ -1,0 +1,23 @@
+# Ignore backups directory
+/backups/
+
+# Ignore files in received_files directory but keep the directory itself
+/received_files/*
+!/received_files/.gitkeep
+
+# Ignore files in shared_files directory but keep the directory itself
+/shared_files/*
+!/shared_files/.gitkeep
+
+# Keep screenshots directory and its contents
+# Don't ignore the screenshots directory and PNG files in it
+!/screenshots/
+!/screenshots/*.png
+
+# Ignore system files
+.DS_Store
+*.log
+.idea/
+__pycache__/
+*.py[cod]
+*$py.class 

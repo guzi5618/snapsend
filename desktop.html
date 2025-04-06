@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap Send - Quick File Transfer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Snap Send</h1>
+        <p>Quickly transfer files between devices on your local network</p>
+        
+        <div id="qrcode-container">
+            <div id="qrcode"></div>
+            <p>Scan this QR code with your mobile device to connect</p>
+        </div>
+        
+        <div id="upload-container">
+            <h2>Send Files to Mobile</h2>
+            <form id="upload-form-desktop">
+                <input type="file" id="file-input-desktop" multiple>
+                <label for="file-input-desktop" class="file-input-label">Choose Files</label>
+                <button type="submit" id="upload-button-desktop">Send to Mobile</button>
+            </form>
+            <div id="progress-container-desktop">
+                <div id="progress-bar-desktop">
+                    <div id="progress-desktop"></div>
+                </div>
+                <p id="upload-status-desktop"></p>
+            </div>
+        </div>
+        
+        <div id="status-container">
+            <p id="connection-status">Waiting for connection...</p>
+            <p id="file-status"></p>
+        </div>
+        
+        <div id="file-list">
+            <h2>Received Files from Mobile</h2>
+            <ul id="files"></ul>
+        </div>
+    </div>
+
+    <script src="qrcode.min.js"></script>
+    <script src="desktop_main.js"></script>
+</body>
+</html> 
