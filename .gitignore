@@ -9,6 +9,9 @@
 /shared_files/*
 !/shared_files/.gitkeep
 
+# Ignore messages.json file
+messages.json
+
 # Keep screenshots directory and its contents
 # Don't ignore the screenshots directory and PNG files in it
 !/screenshots/
@@ -21,3 +24,4 @@
 __pycache__/
 *.py[cod]
 *$py.class 
+
