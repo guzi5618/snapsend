@@ -37,7 +37,7 @@ python3 snap_send_server.py
 - **Can't connect from mobile**: Make sure both devices are on the same network
 - **QR code not scanning**: Try entering the URL manually on your mobile device
 - **Files not transferring**: Check for firewall restrictions on your computer
-- **Large files**: Files over 10MB are not supported in this demo version
+- **Large files**: Files over 10MB are not supported in this version, but can be set up
 
 ## Limitations
 
@@ -46,7 +46,6 @@ This is a simple implementation for local network file transfers. For security r
 - No encryption is used (don't transfer sensitive data)
 - Transfers work only on the same local network
 - There's no authentication mechanism
-- Large files (>10MB) may cause browser performance issues
 - All files are automatically deleted after 5 minutes
 
 ## License
