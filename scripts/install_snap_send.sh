@@ -14,9 +14,12 @@ INSTALL_DIR="$HOME/snap_send"
 if [ ! -d "$INSTALL_DIR" ]; then
   echo "Snap Send is not installed. Installing now..."
   mkdir -p "$INSTALL_DIR"
-  git clone https://github.com/yourusername/snap_send.git "$INSTALL_DIR" 2>/dev/null || {
-    echo "Failed to clone from GitHub. Copying from current directory..."
-    cp -r "$0/../*" "$INSTALL_DIR"
+  # Copy files from the script's directory
+  SCRIPT_DIR="$(dirname "$0")/.."
+  echo "Copying files from $SCRIPT_DIR to $INSTALL_DIR..."
+  cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR" 2>/dev/null || {
+    echo "Error: Could not copy files. Please check permissions."
+    exit 1
   }
 fi
 
@@ -50,10 +53,6 @@ else
   echo "Installing to $INSTALL_PATH"
   echo "You may need to add $HOME/bin to your PATH"
 fi
-
-# Create installation directory and copy current files
-mkdir -p "$HOME/snap_send"
-cp -r "$CURRENT_DIR"/* "$HOME/snap_send/"
 
 # Clean up
 rm /tmp/snap_send

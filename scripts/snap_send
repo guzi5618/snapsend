@@ -20,17 +20,13 @@ if [ ! -d "$SNAP_SEND_DIR" ]; then
         # Create directory
         mkdir -p "$SNAP_SEND_DIR"
         
-        # Try to clone from GitHub
-        if command -v git &> /dev/null; then
-            echo "Using git to install Snap Send..."
-            git clone https://github.com/yourusername/snap_send.git "$SNAP_SEND_DIR" 2>/dev/null
-            
-            if [ $? -ne 0 ]; then
-                echo "Failed to clone from GitHub."
-                exit 1
-            fi
-        else
-            echo "Git is not installed. Please install Snap Send manually."
+        # Get script directory and copy files
+        SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+        echo "Copying files from $SCRIPT_DIR to $SNAP_SEND_DIR"
+        cp -r "$SCRIPT_DIR"/* "$SNAP_SEND_DIR" 2>/dev/null
+        
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to copy files. Please check permissions."
             exit 1
         fi
         
