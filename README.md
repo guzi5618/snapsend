@@ -3,7 +3,7 @@
 A simple tool for transferring files between mobile and desktop on the same local network.
 
 ## Features
-
+- No need mobile apps.
 - Local network file transfer without internet connection
 - Files expire after 5 minutes with countdown timer
 - Two-way file and text transfers (mobile ↔ desktop)
